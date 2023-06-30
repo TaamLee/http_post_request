@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final/build/bootloader/esp-idf/cmake_install.cmake")
+  include("C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request/build/bootloader/esp-idf/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final/build/bootloader/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request/build/bootloader/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

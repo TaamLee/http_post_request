@@ -23,6 +23,8 @@
 #include "mqtt.h"
 #include "wifi.h"
 #include "coap.h"
+#include "http.h"
+
 int wifi_connected = 0;
 void cmd_handler_task(void *p)
 {
@@ -34,13 +36,13 @@ void cmd_handler_task(void *p)
       //control motor outdoor
       if (temp_value_outdoor > 20)
       {
-        printf("turn off motor\n");
+        printf("outdoor: turn off motor\n");
         put_control_request_coap(OFF_COMMAND);
         vTaskDelay( 2000 / portTICK_PERIOD_MS );
       }
       else
       {
-        printf("turn on motor\n");
+        printf("outdoor: turn on motor\n");
         put_control_request_coap(ON_COMMAND);
         vTaskDelay( 2000 / portTICK_PERIOD_MS );
       }
@@ -49,16 +51,16 @@ void cmd_handler_task(void *p)
       if (temp_value_indoor > 28)
       {
         // turn off sock
-        printf("turn off sock\n");
+        printf("indoor: turn off sock\n");
         control_sock(OFF_COMMAND);
-        vTaskDelay( 1000 / portTICK_PERIOD_MS );
+        vTaskDelay( 2000 / portTICK_PERIOD_MS );
       }
       else
       {
         // turn on sock
-        printf("turn on sock\n");
+        printf("indoor: turn on sock\n");
         control_sock(ON_COMMAND);
-        vTaskDelay( 1000 / portTICK_PERIOD_MS );
+        vTaskDelay( 3000 / portTICK_PERIOD_MS );
       }
 
     }
@@ -75,7 +77,7 @@ void get_temperature_task (void* p)
   {
     // get_outdoor_temperature from device 1 through Coap
       get_temperature_request_coap();
-      vTaskDelay( 1000 / portTICK_PERIOD_MS );
+      vTaskDelay( 2000 / portTICK_PERIOD_MS );
   }
 
 }
@@ -105,4 +107,5 @@ void app_main(void)
     
     xTaskCreatePinnedToCore( cmd_handler_task, "cmd_handler", 4*1024, NULL,5,NULL, 1 );
     xTaskCreatePinnedToCore( get_temperature_task, "get_temp_task", 4*1024, NULL,5,NULL, 1 );
+    
 }

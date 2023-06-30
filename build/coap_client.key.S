@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final/main/certs/coap_client.key
+/* * Data converted from C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request/main/certs/coap_client.key
  * (null byte appended)
  */
 .data

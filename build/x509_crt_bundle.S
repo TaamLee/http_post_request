@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

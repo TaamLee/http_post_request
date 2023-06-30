@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final
+# Install script for directory: C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/coap_client")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/prj_iot")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final/build/esp-idf/cmake_install.cmake")
+  include("C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request/build/esp-idf/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/coap_client_Copy_add_mqtt_final/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Admin/Documents/UDEMY_ESP32_WIFI_CODE/gateway_gitclone/http_post_request/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
