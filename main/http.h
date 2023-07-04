@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -18,5 +19,8 @@
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 
 
-void post_rest_function_device1(void);
-void post_rest_function_device2(void);
+void SendtoThingsboard_Device1(uint8_t data);
+void SendtoThingsboard_Device2(uint8_t data);
+
+void GetRequestToThingsboard_Device1();
+void GetRequestToThingsboard_Device2();

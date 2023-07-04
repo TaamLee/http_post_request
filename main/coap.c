@@ -1,9 +1,6 @@
 #include "coap.h"
+#include "app_main.h"
 
-
-#ifndef CONFIG_COAP_CLIENT_SUPPORT
-#error COAP_CLIENT_SUPPORT needs to be enabled
-#endif /* COAP_CLIENT_SUPPORT */
 
 #define COAP_DEFAULT_TIME_SEC 60
 
@@ -41,18 +38,6 @@ const static char *TAG = "CoAP_client";
 static int resp_wait = 1;
 static coap_optlist_t *optlist = NULL;
 static int wait_ms;
-int temp_value_outdoor;
-
-/*variable of coap */
-coap_address_t   *dst_addr;
-static coap_uri_t uri;
-const char       *server_uri = COAP_DEFAULT_DEMO_URI;
-coap_context_t *ctx = NULL;
-unsigned char token[8];
-size_t tokenlength;
-coap_pdu_t *put_request = NULL;
-coap_pdu_t *get_request = NULL;
-coap_session_t *session = NULL;
 
 
 
@@ -78,8 +63,11 @@ message_handler(coap_session_t *session,
             }
             else 
             {
-                temp_value_outdoor = (*data);
-                printf("temperature value: %d\n", (*data));
+                temp_value_outdoor.temperature_value = (*data);
+                temp_value_outdoor.ID_DEVICE = 1;
+                //send to data_queue
+                xQueueSend( data_queue,( void * ) &temp_value_outdoor,( TickType_t ) 10 );
+                printf("outdoor temperature value: %d\n", (*data));
             }
             resp_wait = 0;
         }
@@ -325,88 +313,17 @@ coap_start_pki_session(coap_context_t *ctx, coap_address_t *dst_addr, coap_uri_t
                                               &dtls_pki);
 }
 #endif /* CONFIG_COAP_MBEDTLS_PKI */
-void get_temperature_request_coap (void)
+void GetTemperature_Coap (void)
 {
-    get_request = coap_new_pdu(coap_is_mcast(dst_addr) ? COAP_MESSAGE_NON : COAP_MESSAGE_CON,
-                            COAP_REQUEST_CODE_GET, session);
-    if (!get_request) {
-        ESP_LOGE(TAG, "coap_new_pdu() failed");
-
-    }
-    /* Add in an unique token */
-    coap_session_new_token(session, &tokenlength, token);
-    coap_add_token(get_request, tokenlength, token);
-
-    coap_add_optlist_pdu(get_request, &optlist);
-
-    resp_wait = 1;
-    coap_send(session, get_request);
-
-    wait_ms = COAP_DEFAULT_TIME_SEC * 1000;
-
-    while (resp_wait) {
-        int result = coap_io_process(ctx, wait_ms > 1000 ? 1000 : wait_ms);
-        if (result >= 0) {
-            if (result >= wait_ms) {
-                ESP_LOGE(TAG, "No response from server");
-                break;
-            } else {
-                wait_ms -= result;
-            }
-        }
-    }
-}
-void put_control_request_coap (char *cmd)
-{
-    put_request = coap_pdu_init(COAP_MESSAGE_CON, COAP_REQUEST_PUT,
-                coap_new_message_id(session) /* message id */,
-                coap_session_max_pdu_size(session));
-    if (!put_request) {
-        ESP_LOGE(TAG, "coap_new_pdu() failed");
-    }
-    /* Add in an unique token */
-    coap_session_new_token(session, &tokenlength, token);
-    coap_add_token(put_request, tokenlength, token);
-
-    //add content-type
-    u_char buf[4];
-    coap_insert_optlist(&optlist,
-                        coap_new_optlist(COAP_OPTION_CONTENT_FORMAT,coap_encode_var_safe (buf, sizeof (buf),
-                                                                    COAP_MEDIATYPE_TEXT_PLAIN),
-                                                                    buf));
-    /* Prepare the request */
-    coap_split_uri((const uint8_t *)server_uri, strlen(server_uri), &uri);
-    coap_add_option(put_request, COAP_OPTION_URI_PATH, uri.path.length, uri.path.s);
-
-    coap_add_data(put_request, strlen(cmd), (unsigned char *)cmd);
-    /**/
-
-    coap_add_optlist_pdu(put_request, &optlist);
-
-    resp_wait = 1;
-    coap_send(session, put_request);
-
-    wait_ms = COAP_DEFAULT_TIME_SEC * 1000;
-
-    while (resp_wait) {
-        int result = coap_io_process(ctx, wait_ms > 1000 ? 1000 : wait_ms);
-        if (result >= 0) {
-            if (result >= wait_ms) {
-                ESP_LOGE(TAG, "No response from server");
-                break;
-            } else {
-                wait_ms -= result;
-            }
-        }
-    }
-}
-
-void coap_client_start(void)
-{
-    /* Set up the CoAP logging */
-    coap_set_log_handler(coap_log_handler);
-    coap_set_log_level(EXAMPLE_COAP_LOG_DEFAULT_LEVEL);
-
+    coap_address_t   *dst_addr;
+    static coap_uri_t uri;
+    const char       *server_uri = COAP_DEFAULT_DEMO_URI;
+    coap_context_t *ctx = NULL;
+    unsigned char token[8];
+    size_t tokenlength;
+    coap_pdu_t *put_request = NULL;
+    coap_pdu_t *get_request = NULL;
+    coap_session_t *session = NULL;
     /* Set up the CoAP context */
     ctx = coap_new_context(NULL);
     if (!ctx) {
@@ -453,4 +370,154 @@ void coap_client_start(void)
         ESP_LOGE(TAG, "coap_new_client_session() failed");
     }
 
+    get_request = coap_new_pdu(coap_is_mcast(dst_addr) ? COAP_MESSAGE_NON : COAP_MESSAGE_CON,
+                            COAP_REQUEST_CODE_GET, session);
+    if (!get_request) {
+        ESP_LOGE(TAG, "coap_new_pdu() failed");
+
+    }
+    /* Add in an unique token */
+    coap_session_new_token(session, &tokenlength, token);
+    coap_add_token(get_request, tokenlength, token);
+
+    coap_add_optlist_pdu(get_request, &optlist);
+
+    resp_wait = 1;
+    coap_send(session, get_request);
+
+    wait_ms =  2000;
+
+    while (resp_wait) {
+        int result = coap_io_process(ctx, wait_ms > 1000 ? 1000 : wait_ms);
+        if (result >= 0) {
+            if (result >= wait_ms) {
+                ESP_LOGE(TAG, "No response from server");
+                break;
+            } else {
+                wait_ms -= result;
+            }
+        }
+    }
+
+    if (optlist) {
+        coap_delete_optlist(optlist);
+        optlist = NULL;
+    }
+    if (session) {
+        coap_session_release(session);
+    }
+    if (ctx) {
+        coap_free_context(ctx);
+    }
+    coap_cleanup();
+}
+void ControlMotor_Coap (char *cmd)
+{
+    coap_address_t   *dst_addr;
+    static coap_uri_t uri;
+    const char       *server_uri = COAP_DEFAULT_DEMO_URI;
+    coap_context_t *ctx = NULL;
+    unsigned char token[8];
+    size_t tokenlength;
+    coap_pdu_t *put_request = NULL;
+    coap_pdu_t *get_request = NULL;
+    coap_session_t *session = NULL;
+    /* Set up the CoAP context */
+    ctx = coap_new_context(NULL);
+    if (!ctx) {
+        ESP_LOGE(TAG, "coap_new_context() failed");
+    }
+    coap_context_set_block_mode(ctx,
+                                COAP_BLOCK_USE_LIBCOAP|COAP_BLOCK_SINGLE_BODY);
+
+    coap_register_response_handler(ctx, message_handler);
+
+    if (coap_split_uri((const uint8_t *)server_uri, strlen(server_uri), &uri) == -1) {
+        ESP_LOGE(TAG, "CoAP server uri error");
+    }
+    if (!coap_build_optlist(&uri))
+        ESP_LOGE(TAG, "CoAP server error");
+
+    dst_addr = coap_get_address(&uri);
+    if (!dst_addr)
+        ESP_LOGE(TAG, "CoAP server error");
+
+    /*
+     * Note that if the URI starts with just coap:// (not coaps://) the
+     * session will still be plain text.
+     */
+    if (uri.scheme == COAP_URI_SCHEME_COAPS || uri.scheme == COAP_URI_SCHEME_COAPS_TCP) {
+#ifndef CONFIG_MBEDTLS_TLS_CLIENT
+        ESP_LOGE(TAG, "MbedTLS (D)TLS Client Mode not configured");
+
+#endif /* CONFIG_MBEDTLS_TLS_CLIENT */
+
+#ifdef CONFIG_COAP_MBEDTLS_PSK
+        session = coap_start_psk_session(ctx, dst_addr, &uri);
+#endif /* CONFIG_COAP_MBEDTLS_PSK */
+
+#ifdef CONFIG_COAP_MBEDTLS_PKI
+        session = coap_start_pki_session(ctx, dst_addr, &uri);
+#endif /* CONFIG_COAP_MBEDTLS_PKI */
+    } else {
+        session = coap_new_client_session(ctx, NULL, dst_addr,
+                                          uri.scheme == COAP_URI_SCHEME_COAP_TCP ? COAP_PROTO_TCP :
+                                          COAP_PROTO_UDP);
+    }
+    if (!session) {
+        ESP_LOGE(TAG, "coap_new_client_session() failed");
+    }
+
+    put_request = coap_pdu_init(COAP_MESSAGE_CON, COAP_REQUEST_PUT,
+                coap_new_message_id(session) /* message id */,
+                coap_session_max_pdu_size(session));
+    if (!put_request) {
+        ESP_LOGE(TAG, "coap_new_pdu() failed");
+    }
+    /* Add in an unique token */
+    coap_session_new_token(session, &tokenlength, token);
+    coap_add_token(put_request, tokenlength, token);
+
+    //add content-type
+    u_char buf[4];
+    coap_insert_optlist(&optlist,
+                        coap_new_optlist(COAP_OPTION_CONTENT_FORMAT,coap_encode_var_safe (buf, sizeof (buf),
+                                                                    COAP_MEDIATYPE_TEXT_PLAIN),
+                                                                    buf));
+    /* Prepare the request */
+    coap_split_uri((const uint8_t *)server_uri, strlen(server_uri), &uri);
+    coap_add_option(put_request, COAP_OPTION_URI_PATH, uri.path.length, uri.path.s);
+
+    coap_add_data(put_request, strlen(cmd), (unsigned char *)cmd);
+    /**/
+
+    coap_add_optlist_pdu(put_request, &optlist);
+
+    resp_wait = 1;
+    coap_send(session, put_request);
+
+    wait_ms = 2000;
+
+    while (resp_wait) {
+        int result = coap_io_process(ctx, wait_ms > 1000 ? 1000 : wait_ms);
+        if (result >= 0) {
+            if (result >= wait_ms) {
+                ESP_LOGE(TAG, "No response from server");
+                break;
+            } else {
+                wait_ms -= result;
+            }
+        }
+    }
+    if (optlist) {
+        coap_delete_optlist(optlist);
+        optlist = NULL;
+    }
+    if (session) {
+        coap_session_release(session);
+    }
+    if (ctx) {
+        coap_free_context(ctx);
+    }
+    coap_cleanup();
 }

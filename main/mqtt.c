@@ -1,5 +1,7 @@
 
+#include "app_main.h"
 #include "mqtt.h"
+
 
 //MQTT define
 #define MQTT_URI    "mqtt://192.168.0.4:1883"
@@ -7,12 +9,10 @@
 static const char *TAG = "MQTT_EXAMPLE";
 
 esp_mqtt_client_handle_t client_g = NULL;
-
 int msg_id;
 
-int temp_value_indoor;
 
-void control_sock(char *cmd)
+void ControlSock_Mqtt(char *cmd)
 {
     esp_mqtt_client_publish(client_g, "indoor/control_sock", cmd, 0, 0, 0);
 }
@@ -69,9 +69,13 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         sprintf(topic_name,"%.*s\r\n", event->topic_len, event->topic);
         if (!strncmp(topic_name,"indoor/temperature",8))
         {
-            printf("temperature: %.*s\r\n", event->data_len, event->data);
             topic_name[0] = '\n';
-            temp_value_indoor = (event->data[0]-48)*10 - (event->data[1]-48);
+            temp_value_indoor.temperature_value = (event->data[0]-48)*10 - (event->data[1]-48);
+            temp_value_indoor.ID_DEVICE = 2;
+            //send to data queue
+            xQueueSend( data_queue,( void * ) &temp_value_indoor,( TickType_t ) 10 );
+
+            printf("indoor temperature: %.*s\r\n", event->data_len, event->data);
         }
         if (!strncmp(topic_name,"indoor/light_status",8))
         {

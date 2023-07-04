@@ -22,7 +22,6 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
-extern int temp_value_indoor;
 
-void control_sock(char *cmd);
+void ControlSock_Mqtt(char *cmd);
 void mqtt_app_start(void);
